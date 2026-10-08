@@ -94,7 +94,7 @@ export function renderCard(username, analysis, options = {}) {
   <text x="240" y="91" class="value">${analysis.streakDays}</text>
   <text x="240" y="108" class="label">day streak</text>
   ${bars}
-  <text x="24" y="162" class="label">Peak ${formatHour(analysis.peakHour)} · Weekend ${analysis.weekendCommitPct}% · After hours ${analysis.afterHoursCommitPct}%</text>
+  <text x="24" y="162" class="label">Peak ${formatHour(analysis.peakHour)} · Weekend ${analysis.weekendCommitPct}% · Late night ${analysis.lateNightCommitPct}%</text>
 </svg>`
   }
 
@@ -154,7 +154,6 @@ Generated at ${generatedAt}.
 | Longest streak | ${analysis.longestStreak} days |
 | Peak coding hour | ${formatHour(analysis.peakHour)} |
 | Weekend commits | ${analysis.weekendCommitPct}% |
-| After-hours commits | ${analysis.afterHoursCommitPct}% |
 | Late-night commits | ${analysis.lateNightCommitPct}% |
 | Top languages | ${topLanguages} |
 
@@ -171,7 +170,7 @@ export function writeReportArtifacts({
   username,
   profile,
   analysis,
-  formats = ["svg", "json", "markdown"],
+  formats = ["svg", "markdown"],
   theme = "dark",
   cardStyle = "detailed",
   generatedAt = new Date().toISOString(),
@@ -185,23 +184,6 @@ export function writeReportArtifacts({
     const file = path.resolve(directory, "code-life.svg")
     fs.writeFileSync(file, renderCard(username, analysis, { theme, cardStyle }), "utf8")
     written.svg = file
-  }
-
-  if (formats.includes("json")) {
-    const file = path.resolve(directory, "stats.json")
-    fs.writeFileSync(file, JSON.stringify({
-      schemaVersion: 1,
-      generatedAt,
-      username,
-      profile: profile ? {
-        login: profile.login,
-        name: profile.name,
-        avatar_url: profile.avatar_url,
-        html_url: profile.html_url,
-      } : null,
-      analysis,
-    }, null, 2) + "\n", "utf8")
-    written.json = file
   }
 
   if (formats.includes("markdown")) {

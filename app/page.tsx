@@ -47,11 +47,11 @@ export default async function HomePage() {
               </Link>
             )}
             <Link
-              href="/configure"
+              href={signedIn ? "/dashboard" : hostedAuthAvailable ? "/api/auth" : "/configure"}
               className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-primary-foreground text-sm font-bold hover:opacity-90 transition-opacity"
             >
               <Shield className="w-4 h-4" />
-              Configure
+              {signedIn ? "My dashboard" : hostedAuthAvailable ? "Open dashboard" : "Configure"}
             </Link>
           </div>
         </div>
@@ -90,11 +90,11 @@ export default async function HomePage() {
 
             <div className="flex flex-col items-center gap-5 w-full">
               <Link
-                href="/configure"
+                href={signedIn ? "/dashboard" : hostedAuthAvailable ? "/api/auth" : "/configure"}
                 className="group flex items-center gap-2.5 px-7 py-3.5 rounded-lg bg-primary text-primary-foreground font-bold text-sm hover:opacity-90 transition-opacity"
               >
                 <Shield className="w-4 h-4" />
-                Build my private workflow
+                {signedIn ? "Open my dashboard" : hostedAuthAvailable ? "Open my dashboard" : "Build my report"}
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
               </Link>
               <p className="text-sm text-muted-foreground font-mono">
@@ -114,7 +114,7 @@ export default async function HomePage() {
                   href={signedIn ? "/dashboard" : "/api/auth"}
                   className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  {signedIn ? "Open legacy hosted dashboard" : "Legacy hosted sign-in"}
+                  {signedIn ? "Open my dashboard" : "Sign in to my dashboard"}
                 </Link>
               )}
             </div>
@@ -309,7 +309,7 @@ export default async function HomePage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[
-                { step: "01", title: "Configure your report", desc: "Choose timezone, work hours, card style, output formats, and schedule in the browser." },
+                { step: "01", title: "Open your dashboard", desc: "Sign in with GitHub to see your activity report without defining work hours or schedules." },
                 { step: "02", title: "Run it where you trust", desc: "Use GitHub Actions or the local CLI. Credentials stay in that environment and only GitHub API requests are made." },
                 { step: "03", title: "Own the output", desc: "Generate SVG, JSON, and Markdown in your repository, then embed the card in your GitHub profile." },
               ].map(({ step, title, desc }) => (

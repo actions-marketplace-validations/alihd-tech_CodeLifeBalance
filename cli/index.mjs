@@ -18,13 +18,10 @@ Usage:
 
 Options:
   --username <login>        GitHub username. Defaults to the authenticated gh user.
-  --timezone <IANA>         IANA timezone. Default: UTC
-  --workday-start <0-23>    Workday start hour. Default: 9
-  --workday-end <1-24>      Workday end hour. Default: 18
   --output-dir <path>       Output directory. Default: ./code-life-balance
   --theme <dark|light>      SVG theme. Default: dark
   --card-style <style>      detailed or compact. Default: detailed
-  --formats <list>          svg,json,markdown. Default: all three
+  --formats <list>          svg,markdown. Default: both
   --include-private         Include authenticated private owned repositories/events.
   --public-only             Never use authenticated private activity.
   --no-gh                   Do not read a token from GitHub CLI.
@@ -42,13 +39,10 @@ No credential or report is sent to CodeLifeBalance infrastructure.
 function parseArgs(argv) {
   const config = {
     username: "",
-    timeZone: "UTC",
-    workdayStartHour: 9,
-    workdayEndHour: 18,
     outputDir: "code-life-balance",
     theme: "dark",
     cardStyle: "detailed",
-    formats: ["svg", "json", "markdown"],
+    formats: ["svg", "markdown"],
     includePrivate: false,
     noGh: false,
   }
@@ -64,15 +58,6 @@ function parseArgs(argv) {
     switch (arg) {
       case "--username":
         config.username = next()
-        break
-      case "--timezone":
-        config.timeZone = next()
-        break
-      case "--workday-start":
-        config.workdayStartHour = Number(next())
-        break
-      case "--workday-end":
-        config.workdayEndHour = Number(next())
         break
       case "--output-dir":
         config.outputDir = next()
@@ -108,12 +93,6 @@ function parseArgs(argv) {
 }
 
 function validate(config) {
-  if (!Number.isInteger(config.workdayStartHour) || config.workdayStartHour < 0 || config.workdayStartHour > 23) {
-    throw new Error("--workday-start must be an integer from 0 to 23")
-  }
-  if (!Number.isInteger(config.workdayEndHour) || config.workdayEndHour < 1 || config.workdayEndHour > 24) {
-    throw new Error("--workday-end must be an integer from 1 to 24")
-  }
   if (!["dark", "light"].includes(config.theme)) {
     throw new Error("--theme must be dark or light")
   }
@@ -121,7 +100,7 @@ function validate(config) {
     throw new Error("--card-style must be detailed or compact")
   }
 
-  const allowedFormats = new Set(["svg", "json", "markdown"])
+  const allowedFormats = new Set(["svg", "markdown"])
   if (config.formats.length === 0) throw new Error("--formats cannot be empty")
   for (const format of config.formats) {
     if (!allowedFormats.has(format)) throw new Error(`Unsupported format: ${format}`)
@@ -170,7 +149,6 @@ async function main() {
 
   console.log(`Code Life Balance · @${username}`)
   console.log(`Mode: ${config.includePrivate ? "authenticated/private-enabled" : "public activity"}`)
-  console.log(`Timezone: ${config.timeZone}`)
 
   const { profile, repos, events } = await fetchUserSnapshot({
     username,
@@ -179,11 +157,7 @@ async function main() {
     userAgent: "code-life-balance-cli",
   })
 
-  const analysis = computeAnalysis(repos, events, {
-    timeZone: config.timeZone,
-    workdayStartHour: config.workdayStartHour,
-    workdayEndHour: config.workdayEndHour,
-  })
+  const analysis = computeAnalysis(repos, events)
 
   const directory = path.resolve(process.cwd(), config.outputDir)
   const written = writeReportArtifacts({

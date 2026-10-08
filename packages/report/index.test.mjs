@@ -16,7 +16,6 @@ const analysis = {
   longestStreak: 9,
   peakHour: 14,
   weekendCommitPct: 8,
-  afterHoursCommitPct: 20,
   lateNightCommitPct: 3,
   commitsByDay: [1, 5, 6, 4, 3, 4, 1],
   topLangs: [
@@ -65,7 +64,7 @@ test("writes only the requested report formats", () => {
         html_url: "https://github.com/octocat",
       },
       analysis,
-      formats: ["svg", "json"],
+      formats: ["svg"],
       theme: "dark",
       cardStyle: "detailed",
       generatedAt: "2026-09-21T00:00:00.000Z",
@@ -74,13 +73,9 @@ test("writes only the requested report formats", () => {
     })
 
     assert.equal(fs.existsSync(written.svg), true)
-    assert.equal(fs.existsSync(written.json), true)
     assert.equal("markdown" in written, false)
     assert.equal(fs.existsSync(path.join(directory, "report.md")), false)
-
-    const data = JSON.parse(fs.readFileSync(written.json, "utf8"))
-    assert.equal(data.schemaVersion, 1)
-    assert.equal(data.analysis.balanceScore, 82)
+    assert.equal(fs.existsSync(path.join(directory, "stats.json")), false)
   } finally {
     fs.rmSync(directory, { recursive: true, force: true })
   }

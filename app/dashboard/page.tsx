@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function DashboardPage() {
   const session = await getSession()
   if (!session.user || !session.accessToken) {
-    redirect("/")
+    redirect("/api/auth")
   }
 
   const user = session.user

@@ -64,7 +64,7 @@ test("applies the user's timezone before classifying hours and days", () => {
 
   assert.equal(utc.weekendCommitPct, 33)
   assert.equal(tokyo.weekendCommitPct, 0)
-  assert.notEqual(tokyo.afterHoursCommitPct, utc.afterHoursCommitPct)
+  assert.notEqual(tokyo.peakHour, utc.peakHour)
 })
 
 test("rejects invalid timezones", () => {

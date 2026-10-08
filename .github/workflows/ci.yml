@@ -52,14 +52,11 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           username: ${{ github.repository_owner }}
-          timezone: UTC
-          formats: svg,json,markdown
+          formats: svg,markdown
           output-dir: .tmp/code-life-balance
           commit: "false"
 
       - name: Verify Action artifacts
         run: |
           test -s .tmp/code-life-balance/code-life.svg
-          test -s .tmp/code-life-balance/stats.json
           test -s .tmp/code-life-balance/report.md
-          node -e 'const r=require("./.tmp/code-life-balance/stats.json"); if(r.schemaVersion!==1) process.exit(1)'

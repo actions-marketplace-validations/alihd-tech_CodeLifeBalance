@@ -10,12 +10,12 @@ Built with Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadc
 
 ## Features
 
-- **Privacy-first GitHub Action.** Runs inside the user's GitHub Actions runner and generates SVG, JSON, and Markdown without sending the token or report to CodeLifeBalance.
+- **Personal GitHub dashboard.** The primary experience: sign in with GitHub to explore your current activity report.
+- **Privacy-first GitHub Action.** Runs inside the user's GitHub Actions runner and generates SVG and Markdown without sending the token or report to CodeLifeBalance.
 - **Local CLI.** Uses `GITHUB_TOKEN` or an existing `gh auth` session and writes the same artifacts locally.
 - **Workflow configurator.** The `/configure` page generates workflow YAML and the equivalent CLI command entirely in the browser.
 - **Public username viewer.** Public activity remains available without authorization.
 - **Optional GitHub App.** Adds installation-scoped repository access, signed realtime webhooks, organization/team discovery, and opt-in persistent event history.
-- **Legacy hosted OAuth dashboard.** Still available during the migration, but no longer the primary path.
 - **Balance score (0 to 100).** Derived from weekend, after-hours, late-night, and commit-volume patterns, with actionable recommendations.
 - **Commit timing analysis.** Hour-of-day and day-of-week distributions, peak hour and day, plus five named time sessions (Early Bird, Morning, Afternoon, Evening, Night Owl).
 - **Language breakdown.** Primary-language distribution across your owned repositories.
@@ -36,8 +36,6 @@ name: Code Life Balance
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "17 3 * * 1"
 
 permissions:
   contents: write
@@ -52,12 +50,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           username: ${{ github.repository_owner }}
-          timezone: "UTC"
-          workday-start: "9"
-          workday-end: "18"
           theme: "dark"
           card-style: "detailed"
-          formats: "svg,json,markdown"
+          formats: "svg,markdown"
           output-dir: "code-life-balance"
           commit: "true"
 ```
@@ -69,7 +64,7 @@ For private owned repositories, create a user-owned fine-grained token with only
 Once the npm package is published, run without installing:
 
 ```bash
-npx code-life-balance --username octocat --timezone Europe/Helsinki
+npx code-life-balance --username octocat
 ```
 
 Until the npm registry package is published, the web configurator uses the dependency-free CLI tarball attached to the stable GitHub release so its generated local command can run without cloning this repository. Repository contributors can still use `pnpm cli --`.
@@ -83,20 +78,20 @@ gh auth login
 Then run the current stable CLI release directly:
 
 ```bash
-npx --yes https://github.com/alihd-tech/CodeLifeBalance/releases/download/v1.2.0/code-life-balance-1.2.0.tgz --username octocat --timezone Europe/Helsinki
+npx --yes https://github.com/alihd-tech/CodeLifeBalance/releases/download/v1.2.0/code-life-balance-1.2.0.tgz --username octocat
 ```
 
 Private mode stays on the local machine:
 
 ```bash
-npx --yes https://github.com/alihd-tech/CodeLifeBalance/releases/download/v1.2.0/code-life-balance-1.2.0.tgz --include-private --timezone Europe/Helsinki
+npx --yes https://github.com/alihd-tech/CodeLifeBalance/releases/download/v1.2.0/code-life-balance-1.2.0.tgz --include-private
 ```
 
 The CLI prefers `GITHUB_TOKEN`, then `gh auth token`. Public analysis can run without credentials when a username is supplied.
 
 ### Web configurator
 
-Open `/configure` in the web app to choose timezone, work hours, theme, card style, output formats, and private/public mode. The generated GitHub Actions workflow is manual (`workflow_dispatch`) and the page does not request a GitHub token.
+Open `/dashboard` for the primary signed-in report. Open `/configure` only when you want a manual GitHub Actions or local CLI report. The generated workflow has no schedule and the page does not request a GitHub token.
 
 ## Architecture
 
@@ -143,7 +138,7 @@ action.yml                    GitHub Action metadata and inputs
 
 The analytics engine in `packages/core/index.mjs` is provider-agnostic. The GitHub Action and CLI share `packages/github-client` for GitHub REST access and `packages/report` for SVG, JSON, and Markdown generation. The public and legacy hosted web views reuse the same core through `lib/github.ts`. The recommended private path never goes through the Next.js server.
 
-**Data sources and limits.** Repositories come from `GET /user/repos` (owner affiliation, up to 5 pages). Activity comes from `GET /users/{username}/events` (up to 3 pages). The GitHub Events API only exposes roughly the last 90 days and 300 events, so all commit-timing metrics describe recent activity rather than your full history. The shared analytics core buckets timestamps in an explicit IANA timezone. The web app currently defaults to UTC; the Action exposes a `timezone` input.
+**Data sources and limits.** Repositories come from `GET /user/repos` (owner affiliation, up to 5 pages). Activity comes from `GET /users/{username}/events` (up to 3 pages). The GitHub Events API only exposes roughly the last 90 days and 300 events, so all timing metrics describe recent activity rather than your full history. Reports use the runtime's default timezone and fixed day-period labels, with no workday setup required.
 
 ## Getting started
 

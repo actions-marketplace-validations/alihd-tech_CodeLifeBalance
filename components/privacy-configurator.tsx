@@ -8,10 +8,8 @@ import {
 } from "react"
 import {
   Check,
-  Clock3,
   Code2,
   Copy,
-  FileCode2,
   FolderOutput,
   GitBranch,
   LockKeyhole,
@@ -26,25 +24,7 @@ import {
   generateCliCommand,
   generateWorkflow,
   type PrivacyConfig,
-  type ReportFormat,
 } from "@/lib/privacy-config"
-
-const timeZones = [
-  "UTC",
-  "Europe/Helsinki",
-  "Europe/London",
-  "Europe/Berlin",
-  "America/New_York",
-  "America/Chicago",
-  "America/Denver",
-  "America/Los_Angeles",
-  "Asia/Dubai",
-  "Asia/Tehran",
-  "Asia/Kolkata",
-  "Asia/Singapore",
-  "Asia/Tokyo",
-  "Australia/Sydney",
-]
 
 const fieldClass =
   "h-9 w-full rounded-lg border border-border bg-background px-3 text-sm text-foreground outline-none transition placeholder:text-muted-foreground/65 focus:border-primary focus:ring-2 focus:ring-primary/15"
@@ -61,17 +41,6 @@ export function PrivacyConfigurator() {
 
   const update = <K extends keyof PrivacyConfig>(key: K, value: PrivacyConfig[K]) => {
     setConfig((current) => ({ ...current, [key]: value }))
-  }
-
-  const toggleFormat = (format: ReportFormat) => {
-    setConfig((current) => {
-      const exists = current.formats.includes(format)
-      const formats = exists
-        ? current.formats.filter((item) => item !== format)
-        : [...current.formats, format]
-
-      return { ...current, formats: formats.length ? formats : [format] }
-    })
   }
 
   const copy = async (kind: PreviewMode, value: string) => {
@@ -113,10 +82,10 @@ export function PrivacyConfigurator() {
         <div className="divide-y divide-border/70">
           <ConfigSection
             icon={UserRound}
-            title="Identity & time"
-            description="Who to analyze and how activity hours are interpreted."
+            title="GitHub account"
+            description="Choose the account to analyze. Timing categories are applied automatically with no timezone or workday setup."
           >
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="max-w-sm">
               <Field label="GitHub username" hint="Blank uses the repository owner.">
                 <input
                   value={config.username}
@@ -124,62 +93,6 @@ export function PrivacyConfigurator() {
                   placeholder="octocat"
                   className={fieldClass}
                 />
-              </Field>
-
-              <Field label="Timezone" hint="Any valid IANA timezone works.">
-                <input
-                  list="code-life-timezones"
-                  value={config.timeZone}
-                  onChange={(event) => update("timeZone", event.target.value)}
-                  className={fieldClass}
-                />
-                <datalist id="code-life-timezones">
-                  {timeZones.map((zone) => (
-                    <option key={zone} value={zone} />
-                  ))}
-                </datalist>
-              </Field>
-            </div>
-
-            <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <Field label="Workday starts">
-                <select
-                  value={config.workdayStartHour}
-                  onChange={(event) => {
-                    const start = Number(event.target.value)
-                    setConfig((current) => ({
-                      ...current,
-                      workdayStartHour: start,
-                      workdayEndHour:
-                        current.workdayEndHour <= start
-                          ? Math.min(24, start + 1)
-                          : current.workdayEndHour,
-                    }))
-                  }}
-                  className={fieldClass}
-                >
-                  {Array.from({ length: 24 }, (_, hour) => (
-                    <option key={hour} value={hour}>
-                      {String(hour).padStart(2, "0")}:00
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field label="Workday ends">
-                <select
-                  value={config.workdayEndHour}
-                  onChange={(event) => update("workdayEndHour", Number(event.target.value))}
-                  className={fieldClass}
-                >
-                  {Array.from({ length: 24 }, (_, index) => index + 1)
-                    .filter((hour) => hour > config.workdayStartHour)
-                    .map((hour) => (
-                      <option key={hour} value={hour}>
-                        {hour === 24 ? "24:00" : `${String(hour).padStart(2, "0")}:00`}
-                      </option>
-                    ))}
-                </select>
               </Field>
             </div>
           </ConfigSection>
@@ -227,37 +140,10 @@ export function PrivacyConfigurator() {
               />
             </Field>
 
-            <div className="mt-3">
-              <span className="mb-1.5 block text-xs font-semibold">Output formats</span>
-              <div className="grid grid-cols-3 gap-2">
-                {([
-                  ["svg", "SVG", "Card"],
-                  ["json", "JSON", "Data"],
-                  ["markdown", "MD", "Report"],
-                ] as const).map(([format, shortLabel, caption]) => {
-                  const active = config.formats.includes(format)
-                  return (
-                    <button
-                      key={format}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => toggleFormat(format)}
-                      className={
-                        "rounded-lg border px-2.5 py-2 text-left transition " +
-                        (active
-                          ? "border-primary/60 bg-primary/10 text-primary"
-                          : "border-border bg-background text-muted-foreground hover:border-primary/30 hover:text-foreground")
-                      }
-                    >
-                      <span className="block text-xs font-bold">{shortLabel}</span>
-                      <span className="mt-0.5 block text-[10px] text-current/70">
-                        {caption}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
+            <p className="mt-3 rounded-lg border border-border bg-background px-3 py-2.5 text-xs leading-relaxed text-muted-foreground">
+              The workflow writes a shareable SVG card and Markdown summary. Your interactive
+              dashboard stays available in the app; no JSON file is generated.
+            </p>
 
             <div className="mt-3 grid gap-2">
               <CompactToggle
@@ -321,14 +207,14 @@ export function PrivacyConfigurator() {
 
           <div className="grid grid-cols-3 gap-px border-b border-border/70 bg-border">
             <SummaryItem
-              icon={Clock3}
-              label="Hours"
-              value={`${String(config.workdayStartHour).padStart(2, "0")}:00–${config.workdayEndHour === 24 ? "24:00" : `${String(config.workdayEndHour).padStart(2, "0")}:00`}`}
+              icon={Workflow}
+              label="Run mode"
+              value="Manual"
             />
             <SummaryItem
-              icon={FileCode2}
-              label="Formats"
-              value={config.formats.map((item) => (item === "markdown" ? "MD" : item.toUpperCase())).join(" · ")}
+              icon={FolderOutput}
+              label="Report"
+              value="SVG · Markdown"
             />
             <SummaryItem
               icon={ShieldCheck}

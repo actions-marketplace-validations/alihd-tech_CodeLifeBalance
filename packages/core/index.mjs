@@ -8,8 +8,6 @@
 
 export const DEFAULT_ANALYSIS_CONFIG = Object.freeze({
   timeZone: "UTC",
-  workdayStartHour: 9,
-  workdayEndHour: 18,
   lateNightStartHour: 23,
   lateNightEndHour: 4,
 })
@@ -39,16 +37,6 @@ const EVENT_LABELS = {
 
 function normalizeConfig(config = {}) {
   const merged = { ...DEFAULT_ANALYSIS_CONFIG, ...config }
-
-  if (!Number.isInteger(merged.workdayStartHour) || merged.workdayStartHour < 0 || merged.workdayStartHour > 23) {
-    throw new Error("workdayStartHour must be an integer from 0 to 23")
-  }
-  if (!Number.isInteger(merged.workdayEndHour) || merged.workdayEndHour < 1 || merged.workdayEndHour > 24) {
-    throw new Error("workdayEndHour must be an integer from 1 to 24")
-  }
-  if (merged.workdayStartHour >= merged.workdayEndHour) {
-    throw new Error("workdayStartHour must be earlier than workdayEndHour")
-  }
 
   try {
     new Intl.DateTimeFormat("en-US", { timeZone: merged.timeZone }).format(new Date())
@@ -218,11 +206,6 @@ export function computeAnalysis(repos, events, config = {}) {
   const afternoonPct = safePct(afternoonCommits, totalCommits)
   const eveningPct = safePct(eveningCommits, totalCommits)
   const nightPct = safePct(nightCommits, totalCommits)
-  const workdayCommits = commitsByHour
-    .slice(settings.workdayStartHour, settings.workdayEndHour)
-    .reduce((sum, count) => sum + count, 0)
-  const workdayPct = safePct(workdayCommits, totalCommits)
-
   const timeSessions = [
     { label: "Early Bird", hours: "5am–9am", commits: earlyBirdCommits, pct: earlyBirdPct, colorVar: "var(--chart-3)" },
     { label: "Morning", hours: "9am–1pm", commits: morningCommits, pct: morningPct, colorVar: "var(--chart-1)" },
@@ -241,17 +224,12 @@ export function computeAnalysis(repos, events, config = {}) {
   const weekendCommits = commitsByDay[0] + commitsByDay[6]
   const weekendCommitPct = safePct(weekendCommits, totalCommits)
 
-  let afterHoursCommits = 0
   let lateNightCommits = 0
   for (let hour = 0; hour < 24; hour++) {
-    if (hour < settings.workdayStartHour || hour >= settings.workdayEndHour) {
-      afterHoursCommits += commitsByHour[hour]
-    }
     if (isLateNight(hour, settings.lateNightStartHour, settings.lateNightEndHour)) {
       lateNightCommits += commitsByHour[hour]
     }
   }
-  const afterHoursCommitPct = safePct(afterHoursCommits, totalCommits)
   const lateNightCommitPct = safePct(lateNightCommits, totalCommits)
 
   const typeCounts = {}
@@ -276,7 +254,6 @@ export function computeAnalysis(repos, events, config = {}) {
 
   let balanceScore = 100
   if (weekendCommitPct > 30) balanceScore -= Math.min(25, weekendCommitPct - 30)
-  if (afterHoursCommitPct > 40) balanceScore -= Math.min(25, afterHoursCommitPct - 40)
   if (lateNightCommitPct > 10) balanceScore -= Math.min(20, (lateNightCommitPct - 10) * 2)
   if (avgCommitsPerDay > 15) balanceScore -= 10
   balanceScore = Math.max(0, Math.min(100, Math.round(balanceScore)))
@@ -287,9 +264,6 @@ export function computeAnalysis(repos, events, config = {}) {
   }
   if (lateNightCommitPct > 10) {
     recommendations.push(`${lateNightCommitPct}% of commits are late-night. Consistent sleep improves focus and code quality.`)
-  }
-  if (afterHoursCommitPct > 50) {
-    recommendations.push("More than half your commits happen outside your configured working hours. Consider setting clearer work boundaries.")
   }
   if (avgCommitsPerDay > 15) {
     recommendations.push(`Averaging ${avgCommitsPerDay} commits/day recently. Intense sprints risk burnout. Schedule rest days.`)
@@ -343,7 +317,6 @@ export function computeAnalysis(repos, events, config = {}) {
     streakDays,
     avgCommitsPerDay,
     weekendCommitPct,
-    afterHoursCommitPct,
     lateNightCommitPct,
     peakHour,
     peakDay,
@@ -358,13 +331,10 @@ export function computeAnalysis(repos, events, config = {}) {
     totalStars,
     totalForks,
     earlyBirdPct,
-    workdayPct,
     topLangs,
     hourlyProductivity,
     analysisConfig: {
       timeZone: settings.timeZone,
-      workdayStartHour: settings.workdayStartHour,
-      workdayEndHour: settings.workdayEndHour,
       lateNightStartHour: settings.lateNightStartHour,
       lateNightEndHour: settings.lateNightEndHour,
     },
