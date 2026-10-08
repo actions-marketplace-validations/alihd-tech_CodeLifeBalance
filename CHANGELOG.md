@@ -1,7 +1,7 @@
 # Changelog
 
 All notable Code Life Balance releases are documented here.
- 
+
 ## 1.2.0 - 2026-09-21
 
 ### Added
