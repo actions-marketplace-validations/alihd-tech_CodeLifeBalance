@@ -5,14 +5,12 @@ import { AlertTriangle, CheckCircle2, TrendingUp } from "lucide-react"
 interface BalanceScoreCardProps {
   score: number
   weekendCommitPct: number
-  afterHoursCommitPct: number
   lateNightCommitPct: number
   earlyBirdPct: number
   morningPct: number
   afternoonPct: number
   eveningPct: number
   nightPct: number
-  workdayPct: number
   recommendations: string[]
 }
 
@@ -103,35 +101,17 @@ function ArcGauge({ score, color }: { score: number; color: string }) {
 export function BalanceScoreCard({
   score,
   weekendCommitPct,
-  afterHoursCommitPct,
   lateNightCommitPct,
   earlyBirdPct,
   morningPct,
   afternoonPct,
   eveningPct,
   nightPct,
-  workdayPct,
   recommendations,
 }: BalanceScoreCardProps) {
   const { label, color, textClass, bgClass } = getScoreMeta(score)
 
   const metrics = [
-    {
-      label: "Work hours",
-      value: `${workdayPct}%`,
-      sub: "9am–6pm",
-      good: workdayPct >= 50,
-      goodText: "healthy range",
-      warnText: "low work-hour activity",
-    },
-    {
-      label: "After-hours",
-      value: `${afterHoursCommitPct}%`,
-      sub: "outside 9–6pm",
-      good: afterHoursCommitPct <= 40,
-      goodText: "in check",
-      warnText: afterHoursCommitPct > 40 ? "high" : "moderate",
-    },
     {
       label: "Weekends",
       value: `${weekendCommitPct}%`,

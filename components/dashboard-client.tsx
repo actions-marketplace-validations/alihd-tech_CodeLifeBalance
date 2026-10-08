@@ -124,7 +124,6 @@ export function DashboardClient({ username, isOwner = false }: DashboardClientPr
         longestStreak={data.longestStreak}
         peakHour={data.peakHour}
         mostActiveRepo={data.mostActiveRepo}
-        workdayPct={data.workdayPct}
       />
 
       {/* Balance score + commit timing side by side */}
@@ -133,14 +132,12 @@ export function DashboardClient({ username, isOwner = false }: DashboardClientPr
           <BalanceScoreCard
             score={data.balanceScore}
             weekendCommitPct={data.weekendCommitPct}
-            afterHoursCommitPct={data.afterHoursCommitPct}
             lateNightCommitPct={data.lateNightCommitPct}
             earlyBirdPct={data.earlyBirdPct}
             morningPct={data.morningPct}
             afternoonPct={data.afternoonPct}
             eveningPct={data.eveningPct}
             nightPct={data.nightPct}
-            workdayPct={data.workdayPct}
             recommendations={data.recommendations}
           />
         </div>

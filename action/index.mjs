@@ -13,14 +13,6 @@ function boolInput(name) {
   return input(name).toLowerCase() === "true"
 }
 
-function intInput(name, fallback) {
-  const raw = input(name)
-  if (!raw) return fallback
-  const value = Number(raw)
-  if (!Number.isInteger(value)) throw new Error(`${name} must be an integer`)
-  return value
-}
-
 function listInput(name, fallback) {
   const raw = input(name)
   const values = (raw || fallback)
@@ -28,7 +20,7 @@ function listInput(name, fallback) {
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean)
 
-  const allowed = new Set(["svg", "json", "markdown"])
+  const allowed = new Set(["svg", "markdown"])
   for (const value of values) {
     if (!allowed.has(value)) throw new Error(`Unsupported format: ${value}`)
   }
@@ -87,12 +79,9 @@ async function main() {
   if (!username) throw new Error("username could not be determined")
 
   const includePrivate = boolInput("include-private")
-  const timeZone = input("timezone") || "UTC"
-  const workdayStartHour = intInput("workday-start", 9)
-  const workdayEndHour = intInput("workday-end", 18)
   const theme = input("theme") || "dark"
   const cardStyle = input("card-style") || "detailed"
-  const formats = listInput("formats", "svg,json,markdown")
+  const formats = listInput("formats", "svg,markdown")
 
   if (!["dark", "light"].includes(theme)) {
     throw new Error("theme must be dark or light")
@@ -111,11 +100,7 @@ async function main() {
     userAgent: "code-life-balance-action",
   })
 
-  const analysis = computeAnalysis(repos, events, {
-    timeZone,
-    workdayStartHour,
-    workdayEndHour,
-  })
+  const analysis = computeAnalysis(repos, events)
 
   const written = writeReportArtifacts({
     directory: target,
@@ -138,7 +123,6 @@ async function main() {
 
   setOutput("score", analysis.balanceScore)
   setOutput("svg-path", relativeWritten.svg || "")
-  setOutput("json-path", relativeWritten.json || "")
   setOutput("markdown-path", relativeWritten.markdown || "")
 
   addSummary(`## Code Life Balance
@@ -148,8 +132,6 @@ async function main() {
 - Recent commits: ${analysis.totalCommits}
 - Current streak: ${analysis.streakDays} days
 - Weekend commits: ${analysis.weekendCommitPct}%
-- Timezone: ${timeZone}
-- Workday: ${workdayStartHour}:00-${workdayEndHour}:00
 - Generated formats: ${formats.join(", ")}
 - Committed: ${committed ? "yes" : "no"}
 

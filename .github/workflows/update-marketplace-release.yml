@@ -34,7 +34,7 @@ jobs:
           - Public GitHub activity analysis
           - Optional private repository analysis with your own fine-grained GitHub token
           - Timezone-aware commit timing
-          - Configurable workday hours
+          - Automatic timing insights without workday setup
           - Code-life balance score
           - Weekend, after-hours, and late-night activity metrics
           - Current and longest streaks
@@ -45,7 +45,6 @@ jobs:
           ## Generated outputs
 
           - `code-life.svg` for GitHub profiles and READMEs
-          - `stats.json` for integrations and custom dashboards
           - `report.md` for human-readable reports
 
           ## Basic usage
@@ -55,8 +54,7 @@ jobs:
             with:
               github-token: __DOLLAR__{{ secrets.GITHUB_TOKEN }}
               username: __DOLLAR__{{ github.repository_owner }}
-              timezone: UTC
-              formats: svg,json,markdown
+              formats: svg,markdown
               commit: "false"
           ```
 

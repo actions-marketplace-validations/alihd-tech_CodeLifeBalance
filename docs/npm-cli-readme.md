@@ -5,7 +5,7 @@ Run Code Life Balance locally without sending your GitHub credential or generate
 ## Run without installing
 
 ```bash
-npx code-life-balance --username octocat --timezone Europe/Helsinki
+npx code-life-balance --username octocat
 ```
 
 Or install globally:
@@ -27,7 +27,7 @@ For private owned-repository analysis:
 
 ```bash
 gh auth login
-code-life-balance --include-private --timezone Europe/Helsinki
+code-life-balance --include-private
 ```
 
 Private mode verifies that the authenticated token owner matches the username being analyzed.
@@ -36,13 +36,10 @@ Private mode verifies that the authenticated token owner matches the username be
 
 ```text
 --username <login>        GitHub username
---timezone <IANA>         IANA timezone, default UTC
---workday-start <0-23>    Workday start hour, default 9
---workday-end <1-24>      Workday end hour, default 18
 --output-dir <path>       Output directory
 --theme <dark|light>      SVG theme
 --card-style <style>      detailed or compact
---formats <list>          svg,json,markdown
+--formats <list>          svg,markdown
 --include-private         Include authenticated private owned activity
 --public-only             Force public-only analysis
 --no-gh                   Do not read GitHub CLI authentication
@@ -52,7 +49,6 @@ Private mode verifies that the authenticated token owner matches the username be
 Generated output can include:
 
 - `code-life.svg`
-- `stats.json`
 - `report.md`
 
 ## Privacy

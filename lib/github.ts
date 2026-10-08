@@ -70,7 +70,6 @@ export interface AnalysisData {
   streakDays: number
   avgCommitsPerDay: number
   weekendCommitPct: number
-  afterHoursCommitPct: number
   lateNightCommitPct: number
   peakHour: number
   peakDay: number
@@ -85,13 +84,10 @@ export interface AnalysisData {
   totalStars: number
   totalForks: number
   earlyBirdPct: number
-  workdayPct: number
   topLangs: { name: string; count: number; pct: number }[]
   hourlyProductivity: { hour: number; label: string; commits: number; session: string }[]
   analysisConfig: {
     timeZone: string
-    workdayStartHour: number
-    workdayEndHour: number
     lateNightStartHour: number
     lateNightEndHour: number
   }

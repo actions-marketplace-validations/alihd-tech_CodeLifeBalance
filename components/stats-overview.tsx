@@ -1,6 +1,6 @@
 "use client"
 
-import { GitCommitHorizontal, Flame, TrendingUp, GitFork, Star, Zap, Clock, BookOpen } from "lucide-react"
+import { GitCommitHorizontal, Flame, TrendingUp, GitFork, Star, Clock, BookOpen } from "lucide-react"
 
 interface StatsOverviewProps {
   totalCommits: number
@@ -12,7 +12,6 @@ interface StatsOverviewProps {
   longestStreak: number
   peakHour: number
   mostActiveRepo: string | null
-  workdayPct: number
 }
 
 function formatHour(h: number) {
@@ -32,7 +31,6 @@ export function StatsOverview({
   longestStreak,
   peakHour,
   mostActiveRepo,
-  workdayPct,
 }: StatsOverviewProps) {
   const stats = [
     {
@@ -90,14 +88,6 @@ export function StatsOverview({
       sub: "owned",
       color: "text-[oklch(0.65_0.22_264)]",
       bg: "bg-[oklch(0.65_0.22_264/0.1)]",
-    },
-    {
-      icon: Zap,
-      label: "Work hours",
-      value: `${workdayPct}%`,
-      sub: "9am–6pm commits",
-      color: "text-[oklch(0.70_0.18_155)]",
-      bg: "bg-[oklch(0.70_0.18_155/0.1)]",
     },
   ]
 
